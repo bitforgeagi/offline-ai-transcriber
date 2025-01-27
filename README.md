@@ -1,5 +1,7 @@
 # Offline AI Transcriber
 
+<img width="891" alt="Whisper GUI ss2" src="https://github.com/user-attachments/assets/1c4131aa-06f3-48bb-bf3b-02a4cc6207bb" />
+
 A step-by-step educational guide and implementation showing how to build a Graphical User Interface (GUI) for Whisper AI locally for audio transcription using whisper.cpp. This project demonstrates how to set up efficient, offline speech recognition without relying on cloud services. 
 
 Learn more about [Bitforge Dynamics](https://bitforgedynamics.com) and our [Dark Engine Project](https://darkengine.ai).
@@ -27,14 +29,12 @@ The C++ implementation offers several advantages for learning:
 - Lower memory usage
 - No Python dependencies required
 - Great for understanding low-level AI deployment
-
 ## Installation Guide
 
 ### Prerequisites
-- C++ compiler (gcc/clang)
-- CMake
-- Basic command line knowledge
-- ~2GB storage for models
+- Python 3.10+ (You may need to install a different version depending on your system)
+- Virtual environment (recommended)
+- macOS (M1/M2) specific instructions included below
 
 ### Setup Instructions
 
@@ -44,93 +44,161 @@ git clone https://github.com/bitforgeagi/offline-ai-transcriber.git
 cd offline-ai-transcriber
 ```
 
-2. Build whisper.cpp:
+2. Create and activate a virtual environment:
 ```bash
-cd whisper.cpp
-make
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-3. Download a Whisper model:
+If you are using Windows, you can use the following command to create and activate a virtual environment:
 ```bash
-# For beginners, start with the small model
-bash ./models/download-ggml-model.sh small
-
-# For better accuracy, try the medium model
-bash ./models/download-ggml-model.sh medium
+python -m venv venv
+venv\Scripts\activate
 ```
 
-### Understanding the Models
-
-Whisper offers several model sizes:
-- `tiny`: ~75MB - Fastest, least accurate
-- `base`: ~142MB - Good balance for learning
-- `small`: ~466MB - Recommended starting point
-- `medium`: ~1.5GB - Better accuracy
-- `large`: ~3GB - Best accuracy, slower
-
-We recommend starting with `small` to learn the basics, then experimenting with other sizes.
-
-## Usage & Learning
-
-### Basic Transcription
+3. **IMPORTANT FOR M1/M2 MAC USERS**: 
+Install PyTorch separately first (this is crucial - regular pip install won't work):
 ```bash
-# Transcribe an audio file
-./main -m models/ggml-small.bin -f audio.mp3
-
-# With more detailed output
-./main -m models/ggml-small.bin -f audio.mp3 --print-timestamps
+pip3 install --pre torch torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
 ```
 
-### Learning Exercises
-
-1. **Basic Transcription**
-   - Try transcribing different audio files
-   - Compare accuracy between model sizes
-   - Experiment with different audio formats
-
-2. **Performance Testing**
-   - Time transcription speeds
-   - Monitor CPU usage
-   - Compare memory requirements
-
-3. **Advanced Features**
-   - Try different languages
-   - Experiment with timestamp generation
-   - Test different audio qualities
-
-## Project Structure
-```
-project/
-├── whisper.cpp/           # Core C++ implementation
-├── models/               # Model storage
-├── examples/            # Example usage scenarios
-├── docs/               # Detailed documentation
-└── exercises/         # Learning exercises
+4. Install other requirements:
+```bash
+pip install -r requirements.txt
 ```
 
-## Common Learning Challenges
+5. Install audio dependencies (the brackets need quotes in shell):
+```bash
+pip install 'datasets[audio]'
+```
 
-### Memory Management
-- Understanding model loading
-- Managing RAM usage
-- Optimizing for your hardware
+### Installation Issues You May Encounter
 
-### Performance Tuning
-- CPU thread optimization
-- Model size selection
-- Audio preprocessing
+#### M1/M2 Mac PyTorch Installation
+If you see errors like:
+```
+ERROR: Could not find a version that satisfies the requirement torch
+ERROR: No matching distribution found for torch
+```
+This is a common issue on M1/M2 Macs. The solution is to:
+1. Skip the PyTorch installation in requirements.txt
+2. Use the special installation command in step 3 above
+3. Then proceed with the rest of the requirements
 
-## Resources for Learning
+#### Shell Interpretation Issues
+If you see:
+```
+zsh: no matches found: datasets[audio]
+```
+The shell is trying to interpret the square brackets. Always use quotes:
+```bash
+pip install 'datasets[audio]'
+```
 
-- [Whisper Paper](https://arxiv.org/abs/2212.04356)
-- [whisper.cpp Documentation](https://github.com/ggerganov/whisper.cpp)
+### Installation with Pre-bundled Models
+
+Option 1: Download models separately:
+1. Download models from Hugging Face or Github
+2. Extract to `./models/` directory
+3. Continue with regular installation
+
+Option 2: Automatic download (slower):
+- Skip the above steps
+- Models will download automatically on first run
+
+## Usage
+
+1. Place your audio file in the project directory
+2. Update the audio file path in transcribe.py (default: "test_audio.mp3")
+3. Run the transcription:
+```bash
+python transcribe.py
+```
+
+### Output Format
+The script provides:
+- Complete transcription text
+- Timestamped chunks showing when each part was spoken
+
+## Features
+
+- Offline transcription using Whisper AI (large-v3-turbo model)
+- Timestamp support for precise audio segment identification
+- Automatic GPU detection and utilization if available
+- Optimized for Apple Silicon (M1/M2) Macs
+- Support for long-form audio files
+
+## Technical Details
+
+### Components
+- OpenAI's Whisper (large-v3-turbo model) - A fast and accurate speech recognition model
+- 🤗 Transformers library - Provides the pipeline for easy model usage
+- PyTorch - Powers the underlying computations
+- Automatic hardware acceleration when available
+
+### Model Reset Instructions
+
+To force a fresh download:
+```bash
+rm -rf models/*  # Remove local models
+```
+
+### Model Directory Structure
+```
+models/
+├── .locks/                    # Concurrent access management
+├── models--openai--whisper-large-v3-turbo/
+│   ├── snapshots/            # Model versions
+│   │   └── [hash]/          # Version-specific files
+│   │       ├── config.json   # Model configuration
+│   │       ├── model.safetensors  # Model weights
+│   │       └── ...          # Other model files
+│   └── refs/                 # Version references
+└── .gitkeep                  # Git directory marker
+```
+
+The model directory uses a structured format to manage:
+- Concurrent access through `.locks`
+- Version control through `snapshots`
+- Configuration and weight files
+- Safe tensor storage for efficient loading
+
+### Dependencies
+Core requirements:
+- torch>=2.0.0
+- torchaudio
+- transformers>=4.36.0
+- datasets
+- accelerate>=0.27.0
+- soundfile
+
+Select a model using the --model flag:
+```bash
+python transcribe.py --model small  # Default
+python transcribe.py --model tiny   # Fastest
+python transcribe.py --model large  # Most accurate
+```
+
+### GUI Interface
+
+The application includes a graphical interface with:
+- Upload support for audio files
+- Model selection dropdown
+- Progress indication
+- Scrollable output with timestamps
+- Status updates
+
+To run the GUI version:
+```bash
+python gui.py
+```
 
 ## License
 
-MIT License - Use this for learning and your own projects!
+MIT License - feel free to use this code for your projects!
 
 ## Acknowledgments
 
 - OpenAI for the Whisper model
-- Georgi Gerganov for whisper.cpp
-- The open-source AI community
+- Hugging Face for the Transformers library
+- The PyTorch team for M1/M2 support
