@@ -1,6 +1,6 @@
 # Offline AI Transcriber
 
-<img width="891" alt="Whisper GUI ss2" src="https://github.com/user-attachments/assets/1c4131aa-06f3-48bb-bf3b-02a4cc6207bb" />
+![Create Spectral Whisper Cyber Theme](https://github.com/user-attachments/assets/8e4bc601-8e6d-47b9-b591-199ccdc0b04f)
 
 A step-by-step educational guide and implementation showing how to build a Graphical User Interface (GUI) for Whisper AI locally for audio transcription using whisper.cpp. This project demonstrates how to set up efficient, offline speech recognition without relying on cloud services. 
 
@@ -35,6 +35,8 @@ The C++ implementation offers several advantages for learning:
 - Python 3.10+ (You may need to install a different version depending on your system)
 - Virtual environment (recommended)
 - macOS (M1/M2) specific instructions included below
+
+<img width="889" alt="Whisper GUI ss1" src="https://github.com/user-attachments/assets/6ea20b22-8981-4250-971d-b3c6f7ba049b" />
 
 ### Setup Instructions
 
@@ -192,6 +194,7 @@ To run the GUI version:
 ```bash
 python gui.py
 ```
+<img width="891" alt="Whisper GUI ss2" src="https://github.com/user-attachments/assets/1c4131aa-06f3-48bb-bf3b-02a4cc6207bb" />
 
 ## License
 
